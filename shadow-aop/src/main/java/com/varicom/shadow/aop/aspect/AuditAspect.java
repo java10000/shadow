@@ -1,7 +1,10 @@
 package com.varicom.shadow.aop.aspect;
 
+import static com.varicom.shadow.aop.constant.AopConstant.*;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,30 +22,27 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.varicom.shadow.core.Trace;
+import com.varicom.shadow.core.util.NetworkUtil;
 import com.varicom.shadow.logger.LoggerComponent;
 
 @Aspect
 public class AuditAspect {
-	
-	private static final String root = "0";
-
-	private static final int one = 1;
-
-	private static final String point = ".";
 
 	private static Logger logger = LoggerFactory.getLogger(AuditAspect.class);
 
 	private ThreadLocal<Trace> traceLocal = new ThreadLocal<Trace>();
 
+	private Properties props = System.getProperties(); //系统属性
+	
 	@Autowired
 	private LoggerComponent loggerComponent;
-	
+
 	// 控制指定目录和固定注解的方法
 	// @Pointcut(value="execution(@com.varicom.shadow.aop.annotations.PerfLog * com.varicom..*(..))")
 	@Pointcut(value = "execution(* com.varicom.shadow.aop.demo.controller..*(..))")
 	public void traceTargets() {
 	}
-	
+
 	// 指定传送参数的方法
 	@Pointcut(value = "execution(private * com.varicom.api.core.DefaultVaricomClient._do*(..))")
 	public void traceTrans() {
@@ -68,19 +68,12 @@ public class AuditAspect {
 		}
 	}
 
-	
 	@Before(value = "traceTrans()")
 	public void logPerformanceStats(JoinPoint joinpoint) {
 		try {
 			logger.debug("fill param =============");
 			Map<String, String> map = this.fillTraceParam();
 			this.fillTraceParamToHeaderMap(joinpoint, map);
-
-//			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
-//					.getRequestAttributes()).getRequest();
-//			if (null != request) {
-//				this.fillParamToRequest(request, map);
-//			}
 			logger.debug("fill param =============");
 		} catch (Exception e) {
 			logger.error("trace trans param occur error: ", e);
@@ -104,26 +97,39 @@ public class AuditAspect {
 			logger.error("trace after logger occur error: ", e);
 		}
 	}
-	
-	
-	
-	/**************************各种私有方法**********************************/
-	
 
+	/************************** 各种私有方法 **********************************/
+
+	
 	/**
-	 * 填充rpc传输过程中的参数
+	 * 填充rpc传输过程中的参数--http header
 	 * 
 	 * @return
 	 */
-	private void fillTraceParamToHeaderMap(JoinPoint joinpoint, Map<String, String> map) {
+	@SuppressWarnings("unused")
+	private void fillTraceParamToHttpHeader(Map<String, String> map) {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
+				.getRequestAttributes()).getRequest();
+		if (null != request) {
+			this.fillParamToRequest(request, map);
+		}
+	}
+
+	/**
+	 * 填充rpc传输过程中的参数--header map
+	 * 
+	 * @return
+	 */
+	private void fillTraceParamToHeaderMap(JoinPoint joinpoint,
+			Map<String, String> map) {
 		Object[] args = joinpoint.getArgs();
-		if (null != args && args.length > 0 && args[args.length-1] instanceof Map) {
-			Map<String, String> headerMap = (Map<String, String>) args[args.length-1];
+		if (null != args && args.length > 0
+				&& args[args.length - 1] instanceof Map) {
+			Map<String, String> headerMap = (Map<String, String>) args[args.length - 1];
 			headerMap.putAll(map);
 		}
 	}
-	
-	
+
 	/**
 	 * 填充rpc传输过程中的参数
 	 * 
@@ -134,9 +140,9 @@ public class AuditAspect {
 
 		Trace trace = traceLocal.get();
 		if (null != trace) {
-			map.put("traceId", trace.getTraceId());
-			map.put("spanId", trace.getSpanId());
-			map.put("parentSpanId", trace.getParentSpanId());
+			map.put(DTS_TRACE_ID, trace.getTraceId());
+			map.put(DTS_SPAN_ID, trace.getSpanId());
+			map.put(DTS_PARENT_SPAN_ID, trace.getParentSpanId());
 		}
 
 		return map;
@@ -156,7 +162,7 @@ public class AuditAspect {
 					+ entry.getValue());
 			wrapper.addHeader(entry.getKey(), entry.getValue());
 		}
-		
+
 		return wrapper;
 	}
 
@@ -169,14 +175,13 @@ public class AuditAspect {
 	private Trace getTraceFromJoinPoint(HttpServletRequest request) {
 		Trace trace = new Trace();
 		Trace traceTemp = traceLocal.get();
-		
+
 		if (null == traceTemp || StringUtils.isBlank(traceTemp.getTraceId())) {
 			if (null != request) {
-				String traceId = request.getHeader("traceId");
-
+				String traceId = request.getHeader(DTS_TRACE_ID);
 				String spanName = this.getSpanName(request);
-				String spanId = request.getHeader("spanId");
-				String parentSpanId = request.getHeader("parentSpanId");
+				String spanId = request.getHeader(DTS_SPAN_ID);
+				String parentSpanId = request.getHeader(DTS_PARENT_SPAN_ID);
 
 				trace.setTraceId(traceId);
 				trace.setSpanId(spanId);
@@ -201,10 +206,25 @@ public class AuditAspect {
 		long time = System.currentTimeMillis();
 		trace.setTimestamp(time);
 		trace.setAction(0);
-
+		trace.setSysMap(this.genSysMap());
+		
 		return StringUtils.isNotBlank(trace.getTraceId()) ? trace : null;
 	}
 
+	/**
+	 * 构建应用级参数
+	 * @return
+	 */
+	private Map<String, String> genSysMap()
+	{
+		Map<String, String> sysMap = new HashMap<String, String>();
+		sysMap.put(DTS_SERVICE_NAME, props.getProperty(DTS_SERVICE_NAME));
+		sysMap.put(DTS_SERVICE_IP, NetworkUtil.getLocalIp());
+		return sysMap;
+	}
+	
+	
+	
 	/**
 	 * 
 	 * @param request
@@ -250,7 +270,7 @@ public class AuditAspect {
 		for (Object ob : obs) {
 			if (ob instanceof HttpServletRequest) {
 				HttpServletRequest hsr = (HttpServletRequest) ob;
-				if (StringUtils.isNotBlank(hsr.getHeader("traceId"))) {
+				if (StringUtils.isNotBlank(hsr.getHeader(DTS_TRACE_ID))) {
 					return (HttpServletRequest) ob;
 				}
 			}
