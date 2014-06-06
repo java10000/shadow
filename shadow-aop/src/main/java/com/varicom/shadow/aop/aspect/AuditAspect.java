@@ -1,6 +1,13 @@
 package com.varicom.shadow.aop.aspect;
 
-import static com.varicom.shadow.aop.constant.AopConstant.*;
+import static com.varicom.shadow.aop.constant.AopConstant.DTS_PARENT_SPAN_ID;
+import static com.varicom.shadow.aop.constant.AopConstant.DTS_SERVICE_IP;
+import static com.varicom.shadow.aop.constant.AopConstant.DTS_SERVICE_NAME;
+import static com.varicom.shadow.aop.constant.AopConstant.DTS_SPAN_ID;
+import static com.varicom.shadow.aop.constant.AopConstant.DTS_TRACE_ID;
+import static com.varicom.shadow.aop.constant.AopConstant.one;
+import static com.varicom.shadow.aop.constant.AopConstant.point;
+import static com.varicom.shadow.aop.constant.AopConstant.root;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,10 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -25,7 +28,7 @@ import com.varicom.shadow.core.Trace;
 import com.varicom.shadow.core.util.NetworkUtil;
 import com.varicom.shadow.logger.LoggerComponent;
 
-@Aspect
+//@Aspect
 public class AuditAspect {
 
 	private static Logger logger = LoggerFactory.getLogger(AuditAspect.class);
@@ -39,17 +42,17 @@ public class AuditAspect {
 
 	// 控制指定目录和固定注解的方法
 	// @Pointcut(value="execution(@com.varicom.shadow.aop.annotations.PerfLog * com.varicom..*(..))")
-	@Pointcut(value = "execution(* com.varicom.shadow.aop.demo.controller..*(..))")
+//	@Pointcut(value = "execution(* com.varicom.shadow.aop.demo.controller..*(..))")
 	public void traceTargets() {
 	}
 
 	// 指定传送参数的方法
-	@Pointcut(value = "execution(private * com.varicom.api.core.DefaultVaricomClient._do*(..))")
+//	@Pointcut(value = "execution(private * com.varicom.api.core.DefaultVaricomClient._do*(..))")
 	public void traceTrans() {
 	}
 
-	@Before(value = "traceTargets()")
-	public void before(JoinPoint joinpoint) {
+//	@Before(value = "traceTargets()")
+	public void beforeTraceTargets(JoinPoint joinpoint) {
 		try {
 			logger.debug("Before =============");
 			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
@@ -68,8 +71,8 @@ public class AuditAspect {
 		}
 	}
 
-	@Before(value = "traceTrans()")
-	public void logPerformanceStats(JoinPoint joinpoint) {
+//	@Before(value = "traceTrans()")
+	public void beforeTraceTrans(JoinPoint joinpoint) {
 		try {
 			logger.debug("fill param =============");
 			Map<String, String> map = this.fillTraceParam();
@@ -80,8 +83,8 @@ public class AuditAspect {
 		}
 	}
 
-	@After(value = "traceTargets()")
-	public void after(JoinPoint joinpoint) {
+//	@After(value = "traceTargets()")
+	public void afterTraceTargets(JoinPoint joinpoint) {
 		try {
 			logger.debug("After ======================");
 			Trace trace = traceLocal.get();

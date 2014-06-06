@@ -10,11 +10,11 @@ public interface AopConstant {
 	
 	/****************dts 使用的公共参数变量定义*******************/
 	
-	public static final String DTS_TRACE_ID = ""; 
+	public static final String DTS_TRACE_ID = "DTS_TRACE_ID"; 
 	
-	public static final String DTS_SPAN_ID = ""; 
+	public static final String DTS_SPAN_ID = "DTS_SPAN_ID"; 
 	
-	public static final String DTS_PARENT_SPAN_ID = ""; 
+	public static final String DTS_PARENT_SPAN_ID = "DTS_PARENT_SPAN_ID"; 
 	
 	public static final String DTS_SERVICE_NAME = "service"; 
 	

@@ -4,6 +4,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.stereotype.Component;
 
 import com.varicom.kafka.client.KafkaProperties;
@@ -25,6 +27,12 @@ public class LoggerComponent {
 			new ArrayBlockingQueue<Runnable>(workQueue),
 			new ThreadPoolExecutor.CallerRunsPolicy());
 
+	@PostConstruct
+	public void init()
+	{
+		this.loggerRunnalbe();
+	}
+	
 	/**
 	 * 启动异步线程向kafka写入日志数据
 	 */
@@ -39,7 +47,7 @@ public class LoggerComponent {
 						loggerThreadPool.execute(new Runnable() {
 							public void run() {
 								try {
-//									System.err.println(logger);
+									System.err.println(logger);
 									producer.produce(logger);
 								} catch (Exception e) {
 									e.printStackTrace();
