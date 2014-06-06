@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import com.varicom.shadow.aop.demo.controller.LoggerController;
 
-public class AspectTest {
+public class AspectTest_Standalone {
 
 	private MockMvc mockMvc;
 
@@ -25,7 +25,7 @@ public class AspectTest {
 	@Test
 	public void testView() throws Exception {
 		MvcResult result = mockMvc
-				.perform(MockMvcRequestBuilders.get("/logger"))
+				.perform(MockMvcRequestBuilders.get("/logger").header("traceId", "122112121212"))
 				.andDo(MockMvcResultHandlers.print()).andReturn();
 
 		Assert.assertNotNull(result.getModelAndView().getModel().get("user"));

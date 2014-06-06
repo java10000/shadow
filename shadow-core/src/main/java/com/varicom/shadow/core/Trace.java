@@ -14,20 +14,28 @@ public class Trace implements Serializable {
 
 	private static final long serialVersionUID = 4753054380679741934L;
 	
+	//时间戳
 	private long timestamp;
 	
+	//Trace的动作：0：进入 1：返回
 	private int action;
 
+	//全局追踪的unique编号
 	private String traceId;
 	
+	//当前调用链路的id
 	private String spanId;
 	
+	//当前调用链路的父id
     private String parentSpanId; 
     
+    //当前调用链路的名称（一般使用方法名称或url访问的路径标识）
     private String spanName;
     
+    //扩展系统级别的参数
     private Map<String, String> sysMap;
     
+    //扩展业务级别的参数
     private Map<String, String> diyMap;
 	
 	public String getTraceId() {
@@ -111,4 +119,24 @@ public class Trace implements Serializable {
     {
     	return JSON.parseObject(json, Trace.class);
     }
+    
+    
+//    public static void main(String[] args) {
+//    	Trace trace = new Trace();
+//    	
+//    	trace.setTraceId("00123456789");
+//    	trace.setSpanId("0.1");
+//    	trace.setParentSpanId("0");
+//    	trace.setSpanName("/api/user/query");
+//    	trace.setAction(0);
+//    	trace.setTimestamp(System.currentTimeMillis());
+//    	
+//    	Map<String, String> sysMap = new HashMap<String, String>();
+//    	sysMap.put("ip", "172.16.1.4");
+//    	sysMap.put("service", "user center");
+//    	
+//    	trace.setSysMap(sysMap);
+//    	
+//    	System.out.println(trace.toJson());
+//	}
 }

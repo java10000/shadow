@@ -7,17 +7,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class LoggerController {
 
-	@RequestMapping(value = "/logger", method = RequestMethod.GET) 
-    public String testLogger() {
-    	
-		System.err.println("==========/logger==========");
-		
-		 return "redirect:/abc";
-    }
+	@RequestMapping(value = "/logger", method = RequestMethod.GET)
+	public String testLogger() {
 
-	
-	@RequestMapping(value = "/abc", method = RequestMethod.GET) 
-    public void testLoggerr() {
+		System.err.println("==========/logger==========");
+
+		return "redirect:/abc";
+	}
+
+	@RequestMapping(value = "/abc", method = RequestMethod.GET)
+	public void testLoggerr() {
 		System.err.println("==========/adc==========");
-    }
+	}
 }

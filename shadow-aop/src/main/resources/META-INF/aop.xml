@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <aspectj>
 	<aspects>
-		<aspect name="com.varicom.aop.inventory.aspect.AuditAspect"/>
+		<aspect name="com.varicom.shadow.aop.aspect.AuditAspect"/>
 	</aspects>
 	<weaver options="-verbose -showWeaveInfo">
-	  
+<!-- 	    only weave classes in our application-specific packages -->
+<!--         <include within="com.varicom.shadow.*"/> -->
 	</weaver>
 </aspectj>
