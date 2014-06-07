@@ -14,7 +14,6 @@
 		<slf4j.version>1.6.1</slf4j.version>
 		<aspectj.version>1.7.0</aspectj.version>
 		<java.version>1.7</java.version>
-		<brave.version>2.1.2-SNAPSHOT</brave.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<pluginRepositories>
@@ -25,13 +24,14 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
-
 		<dependency>
-			<groupId>com.varicom.api</groupId>
-			<artifactId>account-sdk</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<groupId>com.varicom</groupId>
+			<artifactId>shadow-core</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.varicom</groupId>
+			<artifactId>shadow-logger</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -39,25 +39,12 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-core</artifactId>
 			<version>1.3</version>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>com.varicom</groupId>
-			<artifactId>shadow-core</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.varicom</groupId>
-			<artifactId>shadow-logger</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -84,21 +71,11 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
-
-
-
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
 			<scope>provided</scope>
-		</dependency>
-
-
-		<dependency>
-			<groupId>net.sf.flexjson</groupId>
-			<artifactId>flexjson</artifactId>
-			<version>2.0</version>
 		</dependency>
 		<!-- Spring dependencies -->
 		<dependency>
@@ -145,34 +122,9 @@
 			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>1.2.144</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>3.5.5-Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-			<version>3.5.5-Final</version>
-			<exclusions>
-				<exclusion>
-					<groupId>cglib</groupId>
-					<artifactId>cglib</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate.javax.persistence</groupId>
-			<artifactId>hibernate-jpa-2.0-api</artifactId>
-			<version>1.0.0.Final</version>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -203,12 +155,6 @@
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 			<version>${aspectj.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>3.2.3.RELEASE</version>
 		</dependency>
 	</dependencies>
 	<build>

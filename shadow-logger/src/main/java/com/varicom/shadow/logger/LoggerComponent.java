@@ -1,5 +1,6 @@
 package com.varicom.shadow.logger;
 
+import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -8,14 +9,17 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
-import com.varicom.kafka.client.KafkaProperties;
 import com.varicom.kafka.client.Producer;
+import com.varicom.kafka.utils.FileUtil;
 import com.varicom.shadow.utils.SleepUtil;
 
 
 @Component
 public class LoggerComponent {
 	
+	private Properties kafkaProperties = new Properties();
+	private String fileName = "kafka-producer.properties";
+	private String topic = "loggerTopic";
 	private static final int corePoolSize = 2;
 	private static final int maxPoolSize = 5;
 	private static final int keepAliveTime = 10;
@@ -30,6 +34,7 @@ public class LoggerComponent {
 	@PostConstruct
 	public void init()
 	{
+		kafkaProperties.putAll(FileUtil.readProp(fileName));
 		this.loggerRunnalbe();
 	}
 	
@@ -40,7 +45,7 @@ public class LoggerComponent {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				final Producer producer = new Producer(KafkaProperties.topic);
+				final Producer producer = new Producer(kafkaProperties, topic);
 				while (true) {
 					if (!LoggerConstant.LOGGER_QUEUE.isEmpty()) {
 						final String logger = LoggerConstant.LOGGER_QUEUE.poll();
@@ -48,7 +53,7 @@ public class LoggerComponent {
 							public void run() {
 								try {
 									System.err.println(logger);
-									producer.produce(logger);
+									producer.send(logger);
 								} catch (Exception e) {
 									e.printStackTrace();
 								} finally {
