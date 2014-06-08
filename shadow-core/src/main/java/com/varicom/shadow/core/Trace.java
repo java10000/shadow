@@ -29,7 +29,18 @@ public class Trace implements Serializable {
 	//当前调用链路的父id
     private String parentSpanId; 
     
-    //当前调用链路的名称（一般使用方法名称或url访问的路径标识）
+	//当前调用链路的子id
+    private String childSpanId; 
+    
+    public String getChildSpanId() {
+		return childSpanId;
+	}
+
+	public void setChildSpanId(String childSpanId) {
+		this.childSpanId = childSpanId;
+	}
+
+	//当前调用链路的名称（一般使用方法名称或url访问的路径标识）
     private String spanName;
     
     //扩展系统级别的参数
@@ -37,7 +48,17 @@ public class Trace implements Serializable {
     
     //扩展业务级别的参数
     private Map<String, String> diyMap;
+    
+    private boolean isRpc;
 	
+	public boolean isRpc() {
+		return isRpc;
+	}
+
+	public void setRpc(boolean isRpc) {
+		this.isRpc = isRpc;
+	}
+
 	public String getTraceId() {
 		return traceId;
 	}

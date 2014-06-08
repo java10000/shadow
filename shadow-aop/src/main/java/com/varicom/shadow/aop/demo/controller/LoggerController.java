@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class LoggerController {
 
 	@RequestMapping(value = "/logger", method = RequestMethod.GET)
-	public String testLogger() {
+	public void testLogger() {
 
 		System.err.println("==========/logger==========");
 
-		return "redirect:/abc";
+//		return "redirect:/abc";
 	}
 
 	@RequestMapping(value = "/abc", method = RequestMethod.GET)

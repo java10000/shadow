@@ -10,7 +10,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.varicom.shadow.utils.SleepUtil;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:applicationContext.xml")
+@ContextConfiguration("classpath:loggerSpringContext.xml")
 public class LoggerComponentTest {
 
 	@Autowired

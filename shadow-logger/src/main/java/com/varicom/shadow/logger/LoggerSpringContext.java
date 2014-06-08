@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
 @Configuration
-@ImportResource({"classpath:applicationContext.xml"})
-public class SpringContext {
+@ImportResource({"classpath:loggerSpringContext.xml"})
+public class LoggerSpringContext {
 
 }

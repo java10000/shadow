@@ -26,7 +26,7 @@ import com.varicom.shadow.utils.SleepUtil;
 //		@ContextConfiguration(name = "child", classes = MvcConfig.class) })
 
 @ContextHierarchy({
-    @ContextConfiguration(name = "parent", locations = "classpath:applicationContext.xml")
+    @ContextConfiguration(name = "parent", locations = "classpath:/applicationContextTest.xml")
 })
 public class AspectTest_WebApp {
 

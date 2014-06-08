@@ -53,6 +53,9 @@ public class AuditAspect {
 
 //	@Before(value = "traceTargets()")
 	public void beforeTraceTargets(JoinPoint joinpoint) {
+		
+		logger.debug("Thread.currentThread().getId() === "+Thread.currentThread().getId());
+		
 		try {
 			logger.debug("Before =============");
 			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
@@ -71,18 +74,6 @@ public class AuditAspect {
 		}
 	}
 
-//	@Before(value = "traceTrans()")
-	public void beforeTraceTrans(JoinPoint joinpoint) {
-		try {
-			logger.debug("fill param =============");
-			Map<String, String> map = this.fillTraceParam();
-			this.fillTraceParamToHeaderMap(joinpoint, map);
-			logger.debug("fill param =============");
-		} catch (Exception e) {
-			logger.error("trace trans param occur error: ", e);
-		}
-	}
-
 //	@After(value = "traceTargets()")
 	public void afterTraceTargets(JoinPoint joinpoint) {
 		try {
@@ -93,11 +84,24 @@ public class AuditAspect {
 				trace.setTimestamp(System.currentTimeMillis());
 				// 日志写入
 				loggerComponent.write(trace.toJson());
-				traceLocal.remove();
+//				traceLocal.remove();
 			}
 			logger.debug("After ======================");
 		} catch (Exception e) {
 			logger.error("trace after logger occur error: ", e);
+		}
+	}
+	
+	
+//	@Before(value = "traceTrans()")
+	public void beforeTraceTrans(JoinPoint joinpoint) {
+		try {
+			logger.debug("fill param =============");
+			Map<String, String> map = this.fillTraceParam();
+			this.fillTraceParamToHeaderMap(joinpoint, map);
+			logger.debug("fill param =============");
+		} catch (Exception e) {
+			logger.error("trace trans param occur error: ", e);
 		}
 	}
 
@@ -144,8 +148,10 @@ public class AuditAspect {
 		Trace trace = traceLocal.get();
 		if (null != trace) {
 			map.put(DTS_TRACE_ID, trace.getTraceId());
-			map.put(DTS_SPAN_ID, trace.getSpanId());
-			map.put(DTS_PARENT_SPAN_ID, trace.getParentSpanId());
+			map.put(DTS_SPAN_ID, trace.getChildSpanId());
+			map.put(DTS_PARENT_SPAN_ID, trace.getSpanId());
+			// 构建下一次跨rpc访问的spanId参数值
+			trace.setChildSpanId(this.routeLineNotRpc(trace.getChildSpanId()));
 		}
 
 		return map;
@@ -190,7 +196,7 @@ public class AuditAspect {
 				trace.setSpanId(spanId);
 				trace.setParentSpanId(parentSpanId);
 				trace.setSpanName(spanName);
-
+				trace.setRpc(Boolean.TRUE);
 				if (StringUtils.isBlank(parentSpanId)) {
 					parentSpanId = root;
 					trace.setSpanId(root);
@@ -203,6 +209,7 @@ public class AuditAspect {
 		} else {
 			BeanUtils.copyProperties(traceTemp, trace);
 			trace.setSpanName(this.getSpanName(request));
+			trace.setRpc(Boolean.FALSE);
 			this.genNewSpanId(trace);
 		}
 
@@ -249,19 +256,30 @@ public class AuditAspect {
 		if (root.equals(spanId)) {
 			spanId = root + point + one;
 		} else {
-			if (trace.getParentSpanId().length() == spanId.length()) {
-				spanId = trace.getSpanId() + point + one;
+			if (trace.isRpc()) {
+//				spanId = spanId;
 			} else {
-				String lastSpanNum = StringUtils.substringAfterLast(
-						trace.getSpanId(), point);
-				spanId = trace.getSpanId() + point
-						+ (Integer.valueOf(lastSpanNum) + one);
+				spanId = this.routeLineNotRpc(spanId);
 			}
 		}
 
 		trace.setSpanId(spanId);
+		trace.setChildSpanId(this.routeLineRpc(spanId));
 	}
 
+	
+	private String routeLineRpc(String spanId)
+	{
+		return spanId + point + one;
+	}
+	
+	private String routeLineNotRpc(String spanId)
+	{
+		String lastSpanNum = StringUtils.substringAfterLast(spanId, point);
+		spanId = StringUtils.substringBeforeLast(spanId,  point) + point + (Integer.valueOf(lastSpanNum) + one);
+		return spanId;
+	}
+	
 	/**
 	 * 对JoinPoint的参数进行类型判断
 	 * 
